@@ -1,5 +1,6 @@
 'use client';
 import { useState } from 'react';
+import { askAI } from '@/app/_components/AIAssistant';
 
 const DATA = [
   { nama: 'Wenny Rahayu', role: 'kasir', status: 'Aktif', telp: '0812-1111-2222', bergabung: '01 Jan 2025', absenHari: 18, absenBulan: 22 },
@@ -29,9 +30,16 @@ export default function KaryawanPage() {
           <h1 className="text-xl font-bold">Daftar Karyawan</h1>
           <p className="text-xs text-gray-500 mt-0.5">{DATA.filter(d => d.status === 'Aktif').length} aktif dari {DATA.length} total</p>
         </div>
-        <button className="px-3 py-1.5 bg-[#0d8a6a] rounded-lg text-xs text-white font-medium hover:bg-[#0a7059] transition-colors">
-          + Tambah Karyawan
-        </button>
+        <div className="flex gap-2">
+          <button onClick={() => askAI('Analisis performa karyawan dan saran jadwal shift yang optimal')}
+            className="px-3 py-1.5 bg-[#0d2137] border border-[#0d8a6a]/30 rounded-lg text-xs text-[#0d8a6a] font-medium hover:bg-[#0d8a6a] hover:text-white transition-colors flex items-center gap-1.5">
+            <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17H3a2 2 0 01-2-2V5a2 2 0 012-2h14a2 2 0 012 2v10a2 2 0 01-2 2h-2" /></svg>
+            Analisa AI
+          </button>
+          <button className="px-3 py-1.5 bg-[#0d8a6a] rounded-lg text-xs text-white font-medium hover:bg-[#0a7059] transition-colors">
+            + Tambah Karyawan
+          </button>
+        </div>
       </div>
 
       <div className="flex bg-[#071220] border border-white/10 rounded-lg overflow-hidden w-fit">

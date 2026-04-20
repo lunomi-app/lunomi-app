@@ -1,6 +1,7 @@
 'use client';
 import { useState } from 'react';
 import { PRODUCTS, CUSTOMERS, PROMOTIONS, consumeInventory, rp } from '@/lib/data/store';
+import { askAI } from '@/app/_components/AIAssistant';
 
 type OrderItem = { produkId: string; nama: string; harga: number; qty: number; catatan: string };
 type TxStatus = 'PENDING' | 'LUNAS' | 'BATAL';
@@ -138,6 +139,11 @@ export default function KasirPage() {
             <span className="text-[#0d8a6a] font-bold">{data.filter(d => d.status === 'LUNAS').length}</span> lunas ·{' '}
             <span className="text-yellow-400 font-bold">{data.filter(d => d.status === 'PENDING').length}</span> pending
           </span>
+          <button onClick={() => askAI('Analisis transaksi kasir hari ini dan produk apa yang bisa diupsell?')}
+            className="px-3 py-1.5 bg-[#0d2137] border border-[#0d8a6a]/30 rounded-lg text-xs text-[#0d8a6a] font-medium hover:bg-[#0d8a6a] hover:text-white transition-colors flex items-center gap-1.5">
+            <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17H3a2 2 0 01-2-2V5a2 2 0 012-2h14a2 2 0 012 2v10a2 2 0 01-2 2h-2" /></svg>
+            Tanya AI
+          </button>
           <button onClick={() => setShowNew(true)}
             className="px-3 py-1.5 bg-[#0d8a6a] rounded-lg text-xs text-white font-medium hover:bg-[#0a7059] transition-colors">
             + Order Baru

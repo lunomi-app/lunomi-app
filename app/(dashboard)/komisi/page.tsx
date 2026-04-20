@@ -1,6 +1,7 @@
 'use client';
 import { useState } from 'react';
 import { STAFF, TRANSACTIONS, rp, salesByStaff, countByStaff, totalKomisiByStaff } from '@/lib/data/store';
+import { askAI } from '@/app/_components/AIAssistant';
 
 const PERIODE = ['Apr 2026', 'Mar 2026', 'Feb 2026'];
 
@@ -31,13 +32,20 @@ export default function KomisiPage() {
           <h1 className="text-xl font-bold">Sistem Komisi</h1>
           <p className="text-xs text-gray-500 mt-0.5">Periode: {periode}</p>
         </div>
-        <div className="flex bg-[#071220] border border-white/10 rounded-lg overflow-hidden">
-          {PERIODE.map(p => (
-            <button key={p} onClick={() => setPeriode(p)}
-              className={`px-3 py-1.5 text-xs font-medium transition-colors ${periode === p ? 'bg-[#0d8a6a] text-white' : 'text-gray-400 hover:text-white'}`}>
-              {p}
-            </button>
-          ))}
+        <div className="flex items-center gap-2">
+          <button onClick={() => askAI('Analisis komisi karyawan bulan ini dan siapa yang memenuhi target?')}
+            className="px-3 py-1.5 bg-[#0d2137] border border-[#0d8a6a]/30 rounded-lg text-xs text-[#0d8a6a] font-medium hover:bg-[#0d8a6a] hover:text-white transition-colors flex items-center gap-1.5">
+            <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17H3a2 2 0 01-2-2V5a2 2 0 012-2h14a2 2 0 012 2v10a2 2 0 01-2 2h-2" /></svg>
+            Tanya AI
+          </button>
+          <div className="flex bg-[#071220] border border-white/10 rounded-lg overflow-hidden">
+            {PERIODE.map(p => (
+              <button key={p} onClick={() => setPeriode(p)}
+                className={`px-3 py-1.5 text-xs font-medium transition-colors ${periode === p ? 'bg-[#0d8a6a] text-white' : 'text-gray-400 hover:text-white'}`}>
+                {p}
+              </button>
+            ))}
+          </div>
         </div>
       </div>
 

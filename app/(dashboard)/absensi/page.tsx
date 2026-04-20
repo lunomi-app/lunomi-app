@@ -1,6 +1,7 @@
 'use client';
 import { useState, useRef, useEffect } from 'react';
 import { STAFF } from '@/lib/data/store';
+import { askAI } from '@/app/_components/AIAssistant';
 
 type AbsenRecord = { id: number; nama: string; waktu: string; tipe: 'MASUK' | 'PULANG'; foto: string | null };
 
@@ -96,9 +97,16 @@ export default function AbsensiPage() {
 
   return (
     <div className="p-5 space-y-4 max-w-3xl mx-auto">
-      <div>
-        <h1 className="text-xl font-bold">Absensi Karyawan</h1>
-        <p className="text-xs text-gray-500 mt-0.5">Jumat, 18 April 2026 · <Clock /></p>
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-xl font-bold">Absensi Karyawan</h1>
+          <p className="text-xs text-gray-500 mt-0.5">Jumat, 18 April 2026 · <Clock /></p>
+        </div>
+        <button onClick={() => askAI('Analisis pola absensi karyawan dan berikan rekomendasi kebijakan kehadiran')}
+          className="px-3 py-1.5 bg-[#0d2137] border border-[#0d8a6a]/30 rounded-lg text-xs text-[#0d8a6a] font-medium hover:bg-[#0d8a6a] hover:text-white transition-colors flex items-center gap-1.5">
+          <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17H3a2 2 0 01-2-2V5a2 2 0 012-2h14a2 2 0 012 2v10a2 2 0 01-2 2h-2" /></svg>
+          Tanya AI
+        </button>
       </div>
 
       {/* Selfie Card */}

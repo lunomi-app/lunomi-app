@@ -1,6 +1,7 @@
 'use client';
 import { useState } from 'react';
 import { TRANSACTIONS, PRODUCTS, STAFF, CUSTOMERS, PROMOTIONS, rp, rpK } from '@/lib/data/store';
+import { askAI } from '@/app/_components/AIAssistant';
 
 const lunasTrx = TRANSACTIONS.filter(t => t.status === 'LUNAS');
 const totalRev = lunasTrx.reduce((s, t) => s + t.total, 0);
@@ -52,6 +53,11 @@ export default function LaporanLengkapPage() {
           <p className="text-xs text-gray-500 mt-0.5">18 April 2026 · Komprehensif semua modul</p>
         </div>
         <div className="flex gap-2">
+          <button onClick={() => askAI('Analisis keuangan hari ini dan berikan insight mendalam tentang profitabilitas')}
+            className="px-3 py-1.5 bg-[#0d2137] border border-[#0d8a6a]/30 rounded-lg text-xs text-[#0d8a6a] font-medium hover:bg-[#0d8a6a] hover:text-white transition-colors flex items-center gap-1.5">
+            <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17H3a2 2 0 01-2-2V5a2 2 0 012-2h14a2 2 0 012 2v10a2 2 0 01-2 2h-2" /></svg>
+            Tanya AI
+          </button>
           <button className="px-3 py-1.5 bg-[#0d2137] border border-white/10 rounded-lg text-xs text-gray-300 hover:bg-white/5 transition-colors">Export PDF</button>
           <button className="px-3 py-1.5 bg-[#0d8a6a] rounded-lg text-xs text-white font-medium hover:bg-[#0a7059] transition-colors">Export Excel</button>
         </div>

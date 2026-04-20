@@ -1,5 +1,6 @@
 'use client';
 import { useState } from 'react';
+import { askAI } from '@/app/_components/AIAssistant';
 
 const DATA = [
   { id: '#TRX-001', waktu: '21:38', kasir: 'Wenny', items: 'Espresso Base x2, Croissant x1', metode: 'QRIS', total: 144000, status: 'LUNAS', jenis: 'Dine-In' },
@@ -42,6 +43,11 @@ export default function PenjualanPage() {
         </div>
         <div className="flex items-center gap-3">
           <span className="text-sm font-bold text-[#0d8a6a]">{rp(total)}</span>
+          <button onClick={() => askAI('Analisis penjualan hari ini, produk terlaris, dan rekomendasi untuk meningkatkan revenue')}
+            className="px-3 py-1.5 bg-[#0d2137] border border-[#0d8a6a]/30 rounded-lg text-xs text-[#0d8a6a] font-medium hover:bg-[#0d8a6a] hover:text-white transition-colors flex items-center gap-1.5">
+            <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17H3a2 2 0 01-2-2V5a2 2 0 012-2h14a2 2 0 012 2v10a2 2 0 01-2 2h-2" /></svg>
+            Tanya AI
+          </button>
           <button className="px-3 py-1.5 bg-[#0d8a6a] rounded-lg text-xs text-white font-medium hover:bg-[#0a7059] transition-colors">Export</button>
         </div>
       </div>

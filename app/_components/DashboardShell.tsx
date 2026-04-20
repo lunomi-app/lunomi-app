@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabase/client';
 import { useRole, type Role } from '@/lib/hooks/useRole';
+import AIAssistant from '@/app/_components/AIAssistant';
 
 const ROLE_HOME: Record<Role, string> = {
   admin: '/dashboard',
@@ -240,6 +241,7 @@ export default function DashboardShell({ children }: { children: React.ReactNode
           {children}
         </div>
       </main>
+      <AIAssistant />
     </div>
   );
 }
