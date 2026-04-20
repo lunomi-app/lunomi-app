@@ -5,18 +5,49 @@ import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabase/client';
 
-const NAV_ITEMS = [
-  { label: 'Overview',     href: '/dashboard',      match: (p: string) => p === '/dashboard',                              icon: 'M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6' },
-  { label: 'Keuangan',     href: '/keuangan',       match: (p: string) => p === '/keuangan' || p === '/keuangan/input',    icon: 'M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z' },
-  { label: 'Penjualan',    href: '/penjualan',      match: (p: string) => p.startsWith('/penjualan'),                      icon: 'M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z' },
-  { label: 'Produk / Menu',href: '/dashboard/menu', match: (p: string) => p.startsWith('/dashboard/menu'),                 icon: 'M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4' },
-  { label: 'Inventori',    href: '/inventori',      match: (p: string) => p.startsWith('/inventori'),                      icon: 'M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4' },
-  { label: 'Pelanggan',    href: '/pelanggan',      match: (p: string) => p.startsWith('/pelanggan'),                      icon: 'M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z' },
-  { label: 'AI Analyst',   href: '/ai-analyst',     match: (p: string) => p === '/ai-analyst',                             icon: 'M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z' },
+const SIDEBAR_GROUPS = [
+  {
+    label: 'ANALITIK',
+    items: [
+      { label: 'Dashboard Penjualan', href: '/dashboard', badge: null },
+      { label: 'Analisa Laporan', href: '/dashboard/analisa', badge: 'GRATIS' },
+      { label: 'Laporan Lengkap', href: '/dashboard/laporan-lengkap', badge: 'GRATIS' },
+    ],
+  },
+  {
+    label: 'MANAJEMEN',
+    items: [
+      { label: 'Produk', href: '/dashboard/menu', badge: null, arrow: true },
+      { label: 'Inventori', href: '/inventori', badge: null, arrow: true },
+      { label: 'Pelanggan', href: '/pelanggan', badge: null, arrow: true },
+      { label: 'Promosi', href: '/dashboard/promosi', badge: null, arrow: true },
+      { label: 'Komisi', href: '/dashboard/komisi', badge: null, arrow: true },
+      { label: 'Invoice', href: '/dashboard/invoice', badge: null, arrow: true },
+      { label: 'Marketing', href: '/dashboard/marketing', badge: null, arrow: true },
+    ],
+  },
+  {
+    label: 'LAPORAN (SEMUA GRATIS)',
+    items: [
+      { label: 'Laporan Penjualan', href: '/laporan/penjualan', badge: null },
+      { label: 'Laporan Dapur', href: '/laporan/dapur', badge: null },
+      { label: 'Laporan Produk', href: '/laporan/produk', badge: null },
+      { label: 'Laporan Jasa', href: '/laporan/jasa', badge: null },
+      { label: 'Laporan Promo & Loyalti', href: '/laporan/promo', badge: null },
+      { label: 'Laporan Pajak', href: '/laporan/pajak', badge: null },
+      { label: 'Laporan Kasir', href: '/laporan/kasir', badge: null },
+      { label: 'Laporan Deposit', href: '/laporan/deposit', badge: null },
+      { label: 'Laporan Pelanggan', href: '/laporan/pelanggan', badge: null },
+      { label: 'Laporan Karyawan', href: '/laporan/karyawan', badge: null },
+      { label: 'Laporan Persediaan', href: '/laporan/persediaan', badge: null },
+      { label: 'Laporan Pemasok', href: '/laporan/pemasok', badge: null },
+      { label: 'Export PDF/Excel', href: '/laporan/export', badge: 'GRATIS' },
+    ],
+  },
 ];
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
-  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+  const [activeTab, setActiveTab] = useState('penjualan');
   const pathname = usePathname();
   const router = useRouter();
 
@@ -26,48 +57,143 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   };
 
   return (
-    <div className="min-h-screen bg-[#121212] flex text-white font-sans">
-      <aside className={`bg-black/40 backdrop-blur-md border-r border-white/10 transition-all duration-300 ${isSidebarOpen ? 'w-64' : 'w-20'} flex flex-col`}>
-        <div className="p-6 flex items-center justify-between">
-          {isSidebarOpen && <h2 className="text-2xl font-bold text-[#C9A84C] tracking-wide">Lunomi</h2>}
-          <button onClick={() => setIsSidebarOpen(!isSidebarOpen)} className="text-gray-400 hover:text-white ml-auto">
-            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" /></svg>
-          </button>
+    <div className="h-screen bg-[#0a1628] flex overflow-hidden text-white font-sans">
+
+      {/* Sidebar */}
+      <aside className="w-52 flex-shrink-0 bg-[#071220] border-r border-white/10 flex flex-col overflow-hidden">
+        {/* Logo */}
+        <div className="px-4 py-4 border-b border-white/10">
+          <div className="flex items-center gap-2">
+            <div className="w-7 h-7 rounded bg-[#0d8a6a] flex items-center justify-center text-xs font-black">GG</div>
+            <div>
+              <p className="text-[10px] font-bold text-white leading-none">CLECO GROUP</p>
+              <p className="text-[8px] text-gray-500 leading-none mt-0.5">INTELLIGENCE DASHBOARD</p>
+            </div>
+          </div>
         </div>
 
-        <nav className="flex-1 px-4 py-2 space-y-1 overflow-y-auto">
-          {NAV_ITEMS.map((item) => (
-            <Link key={item.label} href={item.href} className={`flex items-center gap-4 px-4 py-3 rounded-xl transition-colors ${item.match(pathname) ? 'bg-[#0D3B4A] text-white' : 'text-gray-400 hover:bg-white/5 hover:text-white'}`}>
-              <svg className="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={item.icon} /></svg>
-              {isSidebarOpen && <span className="font-medium whitespace-nowrap">{item.label}</span>}
-            </Link>
+        {/* Nav */}
+        <nav className="flex-1 overflow-y-auto py-2">
+          {SIDEBAR_GROUPS.map((group) => (
+            <div key={group.label} className="mb-2">
+              <p className="px-4 py-1.5 text-[9px] font-bold text-gray-500 tracking-widest uppercase">
+                {group.label}
+              </p>
+              {group.items.map((item) => {
+                const isActive = pathname === item.href;
+                return (
+                  <Link
+                    key={item.label}
+                    href={item.href}
+                    className={`flex items-center justify-between px-4 py-2 text-xs transition-colors ${
+                      isActive
+                        ? 'bg-[#0d3b4a] text-white border-r-2 border-[#0d8a6a]'
+                        : 'text-gray-400 hover:bg-white/5 hover:text-white'
+                    }`}
+                  >
+                    <span className="truncate">{item.label}</span>
+                    <div className="flex items-center gap-1 flex-shrink-0 ml-1">
+                      {item.badge && (
+                        <span className="text-[8px] bg-[#0d8a6a]/20 text-[#0d8a6a] px-1.5 py-0.5 rounded font-bold">
+                          {item.badge}
+                        </span>
+                      )}
+                      {(item as any).arrow && (
+                        <svg className="w-3 h-3 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                        </svg>
+                      )}
+                    </div>
+                  </Link>
+                );
+              })}
+            </div>
           ))}
         </nav>
 
-        <div className="px-4 pb-6">
+        {/* Logout */}
+        <div className="px-4 py-3 border-t border-white/10">
           <button
             onClick={handleLogout}
-            className={`flex items-center gap-4 w-full px-4 py-3 rounded-xl transition-colors text-gray-400 hover:bg-red-500/10 hover:text-red-400`}
+            className="flex items-center gap-2 w-full text-xs text-gray-500 hover:text-red-400 transition-colors"
           >
-            <svg className="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" /></svg>
-            {isSidebarOpen && <span className="font-medium whitespace-nowrap">Keluar</span>}
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+            </svg>
+            Keluar
           </button>
         </div>
       </aside>
 
-      <main className="flex-1 flex flex-col min-h-screen overflow-hidden">
-        <header className="h-20 flex items-center justify-between px-8 bg-black/20 backdrop-blur-sm border-b border-white/5">
-          <h1 className="text-2xl font-semibold capitalize">
-            {pathname === '/dashboard' ? 'Dashboard Utama' : pathname.split('/').pop()?.replace(/-/g, ' ')}
-          </h1>
-          <div className="flex items-center gap-4">
-            <p className="text-sm font-medium hidden md:block">Cleco Pii / Admin</p>
-            <div className="w-10 h-10 rounded-full bg-[#0D3B4A] flex items-center justify-center border border-[#C9A84C]">
-              <span className="font-bold text-[#C9A84C]">C</span>
+      {/* Main */}
+      <main className="flex-1 flex flex-col min-w-0 overflow-hidden">
+
+        {/* Top Header */}
+        <header className="flex-shrink-0 h-12 flex items-center justify-between px-4 bg-[#071220] border-b border-white/10">
+          {/* Tabs */}
+          <div className="flex items-center gap-1">
+            {['Penjualan', 'Order Online', 'Appointment'].map((tab) => {
+              const key = tab.toLowerCase().replace(' ', '-');
+              return (
+                <button
+                  key={tab}
+                  onClick={() => setActiveTab(key)}
+                  className={`px-4 py-1.5 text-xs font-medium rounded transition-colors ${
+                    activeTab === key
+                      ? 'bg-[#0d8a6a] text-white'
+                      : 'text-gray-400 hover:text-white'
+                  }`}
+                >
+                  {tab}
+                </button>
+              );
+            })}
+          </div>
+
+          {/* Right side */}
+          <div className="flex items-center gap-3">
+            {/* Outlet selector */}
+            <div className="flex items-center gap-1.5 bg-[#0d2137] border border-white/10 rounded px-3 py-1.5 text-xs cursor-pointer hover:bg-[#1a3050] transition-colors">
+              <div className="w-2 h-2 rounded-full bg-[#0d8a6a]" />
+              <span>Semua Outlet</span>
+              <svg className="w-3 h-3 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+              </svg>
+            </div>
+
+            {/* Notif icons */}
+            <div className="flex items-center gap-2">
+              {[
+                'M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9',
+                'M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z',
+              ].map((d, i) => (
+                <button key={i} className="relative w-7 h-7 flex items-center justify-center rounded hover:bg-white/5 text-gray-400 hover:text-white transition-colors">
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={d} />
+                  </svg>
+                  {i === 0 && (
+                    <span className="absolute top-0.5 right-0.5 w-1.5 h-1.5 bg-red-500 rounded-full" />
+                  )}
+                </button>
+              ))}
+            </div>
+
+            {/* Admin */}
+            <div className="flex items-center gap-2">
+              <div className="w-7 h-7 rounded-full bg-[#0d3b4a] border border-[#0d8a6a] flex items-center justify-center text-xs font-bold text-[#0d8a6a]">
+                GG
+              </div>
+              <div className="hidden md:block text-right">
+                <p className="text-xs font-semibold text-white leading-none">Admin</p>
+                <p className="text-[9px] text-gray-500 leading-none mt-0.5">Owner - CLECO GROUP</p>
+              </div>
             </div>
           </div>
         </header>
-        <div className="flex-1 p-8 overflow-y-auto">{children}</div>
+
+        <div className="flex-1 overflow-y-auto bg-[#0a1628]">
+          {children}
+        </div>
       </main>
     </div>
   );

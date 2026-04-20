@@ -1,330 +1,274 @@
 'use client';
 
+import { useState } from 'react';
 import {
   AreaChart, Area, XAxis, YAxis,
   CartesianGrid, Tooltip, ResponsiveContainer,
 } from 'recharts';
 
-// ── Sample data ──────────────────────────────────────────────
-const arusKasData = [
-  { hari: '10 Apr', pemasukan: 4200000, pengeluaran: 1800000 },
-  { hari: '11 Apr', pemasukan: 3800000, pengeluaran: 2100000 },
-  { hari: '12 Apr', pemasukan: 5100000, pengeluaran: 1950000 },
-  { hari: '13 Apr', pemasukan: 4700000, pengeluaran: 2300000 },
-  { hari: '14 Apr', pemasukan: 6200000, pengeluaran: 2800000 },
-  { hari: '15 Apr', pemasukan: 5500000, pengeluaran: 2100000 },
-  { hari: '16 Apr', pemasukan: 4900000, pengeluaran: 1700000 },
+const salesChartData = [
+  { jam: '00:00', hari_ini: 0, kemarin: 0 },
+  { jam: '03:00', hari_ini: 0, kemarin: 15000 },
+  { jam: '06:00', hari_ini: 25000, kemarin: 30000 },
+  { jam: '09:00', hari_ini: 180000, kemarin: 140000 },
+  { jam: '12:00', hari_ini: 420000, kemarin: 380000 },
+  { jam: '15:00', hari_ini: 310000, kemarin: 290000 },
+  { jam: '18:00', hari_ini: 650000, kemarin: 520000 },
+  { jam: '21:00', hari_ini: 240000, kemarin: 200000 },
 ];
 
-const opexData = [
-  { kategori: 'Bahan Baku',  realisasi: 1644900, anggaran: 4000000, pct: 41 },
-  { kategori: 'Operasional', realisasi: 3047300, anggaran: 1500000, pct: 203, over: true },
-  { kategori: 'Gaji',        realisasi: 600000,  anggaran: 7300000, pct: 8 },
-  { kategori: 'Listrik',     realisasi: 500000,  anggaran: 1300000, pct: 38 },
-  { kategori: 'Sewa',        realisasi: 0,        anggaran: 2500000, pct: 0 },
-  { kategori: 'Internet',    realisasi: 0,        anggaran: 233100,  pct: 0 },
+const kategoriPenjualan = [
+  { nama: 'Espresso Base', pct: 82, color: '#f0c040' },
+  { nama: 'Manual Brew', pct: 54, color: '#0d8a6a' },
+  { nama: 'Non-Coffee', pct: 38, color: '#60a5fa' },
+  { nama: 'Makanan', pct: 22, color: '#c084fc' },
+  { nama: 'Merchandise', pct: 11, color: '#f97316' },
+];
+
+const metodePembayaran = [
+  { nama: 'QRIS / GoPay', pct: 49, amount: 410000, color: '#0d8a6a' },
+  { nama: 'Tunai', pct: 42, amount: 352000, color: '#60a5fa' },
+  { nama: 'Debit/Kartu', pct: 9, amount: 82776, color: '#f0c040' },
 ];
 
 const transaksiTerbaru = [
-  { tgl: '16 Apr', keterangan: 'Penjualan Kopi Susu',  kategori: 'PEMASUKAN',   debit: 450000, kredit: null },
-  { tgl: '16 Apr', keterangan: 'Beli bahan baku',      kategori: 'BAHAN BAKU',  debit: null,   kredit: 312000 },
-  { tgl: '16 Apr', keterangan: 'Bayar listrik',        kategori: 'OPERASIONAL', debit: null,   kredit: 500000 },
-  { tgl: '15 Apr', keterangan: 'Penjualan Croissant',  kategori: 'PEMASUKAN',   debit: 280000, kredit: null },
-  { tgl: '15 Apr', keterangan: 'Bensin operasional',   kategori: 'OPERASIONAL', debit: null,   kredit: 85000 },
-  { tgl: '14 Apr', keterangan: 'Penjualan Cake slice', kategori: 'PEMASUKAN',   debit: 195000, kredit: null },
-  { tgl: '14 Apr', keterangan: 'Indomie 1 karton',     kategori: 'BAHAN BAKU',  debit: null,   kredit: 114000 },
+  { waktu: '21:38', kasir: 'Wenny', produk: 'Espresso Base x 2', jenis: 'Dine-In', pembayaran: 'QRIS', total: 144000, status: 'LUNAS' },
+  { waktu: '21:15', kasir: 'LUTPI', produk: 'Latte x 1, Croissant x 1', jenis: 'Take Away', pembayaran: 'Tunai', total: 87000, status: 'LUNAS' },
+  { waktu: '20:52', kasir: 'Eva', produk: 'Matcha Latte x 3', jenis: 'Dine-In', pembayaran: 'Debit', total: 210000, status: 'LUNAS' },
+  { waktu: '20:11', kasir: 'Wenny', produk: 'Manual Brew x 1', jenis: 'Take Away', pembayaran: 'GoPay', total: 65000, status: 'PENDING' },
 ];
 
-const produkTerlaris = [
-  { nama: 'Kopi Susu',    terjual: 142, revenue: 2130000 },
-  { nama: 'Croissant',    terjual: 98,  revenue: 1470000 },
-  { nama: 'Matcha Latte', terjual: 76,  revenue: 1140000 },
-  { nama: 'Cake Slice',   terjual: 54,  revenue: 810000 },
-  { nama: 'Americano',    terjual: 43,  revenue: 516000 },
-];
-
-// ── Helpers ───────────────────────────────────────────────────
 function rp(n: number) {
   return 'Rp ' + n.toLocaleString('id-ID');
-}
-function rpShort(n: number) {
-  if (n >= 1_000_000) return 'Rp ' + (n / 1_000_000).toFixed(1) + 'jt';
-  if (n >= 1_000)     return 'Rp ' + (n / 1_000).toFixed(0) + 'rb';
-  return rp(n);
-}
-
-// ── Sub-components ────────────────────────────────────────────
-function KPICard({ label, value, sub, trend, color }: {
-  label: string; value: string; sub?: string;
-  trend?: { pct: number; up: boolean }; color: string;
-}) {
-  return (
-    <div style={{
-      background: 'linear-gradient(135deg, #0d2137 0%, #0a1a2e 100%)',
-      border: `1px solid ${color}33`,
-      borderRadius: 16, padding: '20px 24px',
-      position: 'relative', overflow: 'hidden',
-    }}>
-      <div style={{
-        position: 'absolute', top: -20, right: -20,
-        width: 80, height: 80, borderRadius: '50%',
-        background: color + '18',
-      }} />
-      <p style={{ color: '#8fa8c0', fontSize: 12, fontWeight: 600,
-        letterSpacing: '0.08em', textTransform: 'uppercase', margin: 0 }}>
-        {label}
-      </p>
-      <p style={{ color, fontSize: 26, fontWeight: 700,
-        margin: '8px 0 4px', fontFamily: 'Georgia, serif' }}>
-        {value}
-      </p>
-      {sub && <p style={{ color: '#5a7a94', fontSize: 12, margin: 0 }}>{sub}</p>}
-      {trend && (
-        <div style={{
-          display: 'inline-flex', alignItems: 'center', gap: 4,
-          marginTop: 8, background: trend.up ? '#10b98120' : '#ef444420',
-          borderRadius: 20, padding: '2px 10px',
-        }}>
-          <span style={{ color: trend.up ? '#10b981' : '#ef4444', fontSize: 12, fontWeight: 700 }}>
-            {trend.up ? '▲' : '▼'} {trend.pct}%
-          </span>
-          <span style={{ color: '#5a7a94', fontSize: 11 }}>vs bulan lalu</span>
-        </div>
-      )}
-    </div>
-  );
-}
-
-function OpexCard({ item }: { item: typeof opexData[0] }) {
-  const pct = Math.min(item.pct, 100);
-  const over = item.over;
-  return (
-    <div style={{
-      background: '#0d2137',
-      border: `1px solid ${over ? '#ef444430' : '#1e3a52'}`,
-      borderRadius: 12, padding: '16px 20px',
-    }}>
-      <p style={{ color: '#8fa8c0', fontSize: 11, letterSpacing: '0.1em',
-        textTransform: 'uppercase', margin: '0 0 4px' }}>{item.kategori}</p>
-      <p style={{ color: over ? '#ef4444' : '#f0c040', fontSize: 20,
-        fontWeight: 700, margin: '0 0 2px', fontFamily: 'Georgia, serif' }}>
-        {rpShort(item.realisasi)}
-      </p>
-      <p style={{ color: '#4a6a84', fontSize: 11, margin: '0 0 10px' }}>
-        dari {rpShort(item.anggaran)}
-      </p>
-      <div style={{ height: 6, background: '#1e3a52', borderRadius: 4, overflow: 'hidden' }}>
-        <div style={{
-          height: '100%', width: `${pct}%`, borderRadius: 4,
-          background: over
-            ? 'linear-gradient(90deg, #ef4444, #ff6b6b)'
-            : 'linear-gradient(90deg, #f0c040, #ffd700)',
-        }} />
-      </div>
-      <p style={{ fontSize: 11, fontWeight: 700, marginTop: 6,
-        color: over ? '#ef4444' : '#10b981' }}>
-        {over ? `⚠ Over ${item.pct}%` : `✓ OK ${item.pct}%`}
-      </p>
-    </div>
-  );
 }
 
 const CustomTooltip = ({ active, payload, label }: any) => {
   if (!active || !payload?.length) return null;
   return (
-    <div style={{
-      background: '#0a1628', border: '1px solid #1e3a52',
-      borderRadius: 10, padding: '10px 16px', fontSize: 13,
-    }}>
-      <p style={{ color: '#8fa8c0', margin: '0 0 6px', fontWeight: 600 }}>{label}</p>
+    <div className="bg-[#071220] border border-white/10 rounded-lg p-3 text-xs">
+      <p className="text-gray-400 mb-1 font-medium">{label}</p>
       {payload.map((p: any) => (
-        <p key={p.name} style={{ color: p.color, margin: '2px 0' }}>
-          {p.name}: {rpShort(p.value)}
+        <p key={p.name} style={{ color: p.color }} className="mb-0.5">
+          {p.name === 'hari_ini' ? 'Hari Ini' : 'Kemarin'}: {rp(p.value)}
         </p>
       ))}
     </div>
   );
 };
 
-// ── Main Dashboard ────────────────────────────────────────────
-export default function LunomiDashboard() {
-  return (
-    <div style={{ color: '#e0eaf4', fontFamily: "'Segoe UI', system-ui, sans-serif" }}>
+export default function DashboardPenjualan() {
+  const [period, setPeriod] = useState('hari-ini');
 
-      {/* ── KPI CARDS ── */}
-      <div style={{
-        display: 'grid',
-        gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
-        gap: 16, marginBottom: 24,
-      }}>
-        <KPICard label="Total Pemasukan" value="Rp 52,7jt"
-          sub="Bulan April 2026" trend={{ pct: 12, up: true }} color="#10b981" />
-        <KPICard label="Total Pengeluaran" value="Rp 18,4jt"
-          sub="Bulan April 2026" trend={{ pct: 5, up: false }} color="#ef4444" />
-        <KPICard label="Laba Bersih" value="Rp 34,3jt"
-          sub="Margin 65%" trend={{ pct: 18, up: true }} color="#f0c040" />
-        <KPICard label="Transaksi" value="370"
-          sub="102 hari ini" trend={{ pct: 8, up: true }} color="#60a5fa" />
+  return (
+    <div className="p-5 space-y-4">
+
+      {/* Header */}
+      <div className="flex items-start justify-between">
+        <div>
+          <h1 className="text-xl font-bold text-white">Dashboard Penjualan</h1>
+          <p className="text-xs text-gray-500 mt-0.5">
+            📅 18 April 2026 · Semua Outlet · Real-time data
+          </p>
+        </div>
+        <div className="flex items-center gap-2">
+          <div className="flex bg-[#071220] border border-white/10 rounded-lg overflow-hidden">
+            {[
+              { label: 'Hari Ini', val: 'hari-ini' },
+              { label: 'Minggu Ini', val: 'minggu-ini' },
+              { label: 'Bulan Ini', val: 'bulan-ini' },
+              { label: 'Custom', val: 'custom' },
+            ].map((p) => (
+              <button
+                key={p.val}
+                onClick={() => setPeriod(p.val)}
+                className={`px-3 py-1.5 text-xs font-medium transition-colors ${
+                  period === p.val ? 'bg-[#0d8a6a] text-white' : 'text-gray-400 hover:text-white'
+                }`}
+              >
+                {p.label}
+              </button>
+            ))}
+          </div>
+          <button className="flex items-center gap-1.5 px-3 py-1.5 bg-[#071220] border border-white/10 rounded-lg text-xs text-gray-300 hover:bg-white/5 transition-colors">
+            <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+            </svg>
+            Export
+          </button>
+          <button className="flex items-center gap-1.5 px-3 py-1.5 bg-[#0d8a6a] rounded-lg text-xs text-white font-medium hover:bg-[#0a7059] transition-colors">
+            <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+            </svg>
+            Tanya AI
+          </button>
+        </div>
       </div>
 
-      {/* ── CHARTS ROW ── */}
-      <div style={{
-        display: 'grid', gridTemplateColumns: '1.6fr 1fr',
-        gap: 16, marginBottom: 24,
-      }}>
-        {/* Arus Kas Chart */}
-        <div style={{
-          background: 'linear-gradient(135deg, #0d2137, #0a1a2e)',
-          border: '1px solid #1e3a52', borderRadius: 16, padding: 24,
-        }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
-            <div>
-              <p style={{ margin: 0, fontWeight: 700, fontSize: 15 }}>Arus Kas Harian</p>
-              <p style={{ margin: 0, fontSize: 12, color: '#4a6a84' }}>7 hari terakhir</p>
+      {/* Red Flag Alert */}
+      <div className="flex items-center gap-3 bg-red-500/10 border border-red-500/30 rounded-xl px-4 py-3">
+        <div className="w-8 h-8 rounded-full bg-red-500/20 flex items-center justify-center flex-shrink-0">
+          <svg className="w-4 h-4 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+          </svg>
+        </div>
+        <div className="flex-1 min-w-0">
+          <p className="text-sm font-semibold text-red-400">3 Red Flag Terdeteksi Hari Ini</p>
+          <p className="text-xs text-red-300/70 truncate">
+            Pengeluaran operasional +240% dari rata-rata · Selisih stok 8% di Outlet Utama · Refund berulang dari kasir yang sama
+          </p>
+        </div>
+        <button className="flex-shrink-0 px-3 py-1.5 bg-red-500 text-white text-xs font-medium rounded-lg hover:bg-red-600 transition-colors whitespace-nowrap">
+          Lihat Detail →
+        </button>
+      </div>
+
+      {/* KPI Cards */}
+      <div className="grid grid-cols-4 gap-3">
+        {[
+          { label: 'Total Penjualan Hari Ini', value: 'Rp 844.776', trend: '+18.4%', up: true, icon: '💰' },
+          { label: 'Profit Bersih (After OPEX)', value: 'Rp 312.450', trend: '+11.2%', up: true, icon: '📈' },
+          { label: 'Total Transaksi', value: '127', trend: '+23 transaksi', up: true, icon: '🧾' },
+          { label: 'Customer Baru', value: '14', trend: '-3 vs kemarin', up: false, icon: '👥' },
+        ].map((card) => (
+          <div key={card.label} className="bg-[#0d2137] border border-white/10 rounded-xl p-4">
+            <div className="flex items-start justify-between mb-2">
+              <p className="text-xs text-gray-400 leading-tight">{card.label}</p>
+              <span className="text-base">{card.icon}</span>
             </div>
-            <div style={{ display: 'flex', gap: 16, fontSize: 12 }}>
-              <span style={{ color: '#10b981' }}>● Pemasukan</span>
-              <span style={{ color: '#ef4444' }}>● Pengeluaran</span>
+            <p className="text-xl font-bold text-white mb-1">{card.value}</p>
+            <span className={`inline-flex text-xs px-2 py-0.5 rounded-full font-medium ${
+              card.up ? 'bg-green-500/15 text-green-400' : 'bg-red-500/15 text-red-400'
+            }`}>
+              {card.up ? '▲' : '▼'} {card.trend}
+            </span>
+          </div>
+        ))}
+      </div>
+
+      {/* Chart + Categories */}
+      <div className="grid grid-cols-5 gap-4">
+        {/* Sales Chart */}
+        <div className="col-span-3 bg-[#0d2137] border border-white/10 rounded-xl p-4">
+          <div className="flex items-center justify-between mb-3">
+            <p className="text-sm font-semibold">Grafik Penjualan Hari Ini vs Kemarin</p>
+            <div className="flex items-center gap-3 text-xs text-gray-400">
+              <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-[#0d8a6a] inline-block" /> 18 Apr 2026</span>
+              <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-gray-500 inline-block" /> 17 Apr 2026</span>
             </div>
           </div>
           <ResponsiveContainer width="100%" height={200}>
-            <AreaChart data={arusKasData}>
+            <AreaChart data={salesChartData}>
               <defs>
-                <linearGradient id="colorIn" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="#10b981" stopOpacity={0.3} />
-                  <stop offset="95%" stopColor="#10b981" stopOpacity={0} />
+                <linearGradient id="gToday" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="5%" stopColor="#0d8a6a" stopOpacity={0.35} />
+                  <stop offset="95%" stopColor="#0d8a6a" stopOpacity={0} />
                 </linearGradient>
-                <linearGradient id="colorOut" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="#ef4444" stopOpacity={0.3} />
-                  <stop offset="95%" stopColor="#ef4444" stopOpacity={0} />
+                <linearGradient id="gYesterday" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="5%" stopColor="#4a6a84" stopOpacity={0.25} />
+                  <stop offset="95%" stopColor="#4a6a84" stopOpacity={0} />
                 </linearGradient>
               </defs>
               <CartesianGrid strokeDasharray="3 3" stroke="#1e3a52" />
-              <XAxis dataKey="hari" stroke="#4a6a84" tick={{ fontSize: 11 }} />
-              <YAxis stroke="#4a6a84" tick={{ fontSize: 11 }} tickFormatter={rpShort} />
+              <XAxis dataKey="jam" stroke="#4a6a84" tick={{ fontSize: 10 }} />
+              <YAxis stroke="#4a6a84" tick={{ fontSize: 10 }} tickFormatter={(v) => v >= 1000 ? `${v/1000}k` : v} />
               <Tooltip content={<CustomTooltip />} />
-              <Area type="monotone" dataKey="pemasukan" name="Pemasukan"
-                stroke="#10b981" fill="url(#colorIn)" strokeWidth={2} />
-              <Area type="monotone" dataKey="pengeluaran" name="Pengeluaran"
-                stroke="#ef4444" fill="url(#colorOut)" strokeWidth={2} />
+              <Area type="monotone" dataKey="hari_ini" stroke="#0d8a6a" fill="url(#gToday)" strokeWidth={2} />
+              <Area type="monotone" dataKey="kemarin" stroke="#4a6a84" fill="url(#gYesterday)" strokeWidth={1.5} strokeDasharray="4 2" />
             </AreaChart>
           </ResponsiveContainer>
         </div>
 
-        {/* Top Produk */}
-        <div style={{
-          background: 'linear-gradient(135deg, #0d2137, #0a1a2e)',
-          border: '1px solid #1e3a52', borderRadius: 16, padding: 24,
-        }}>
-          <p style={{ margin: '0 0 16px', fontWeight: 700, fontSize: 15 }}>
-            🏆 Produk Terlaris
-          </p>
-          {produkTerlaris.map((p, i) => (
-            <div key={p.nama} style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 12 }}>
-              <span style={{
-                width: 24, height: 24, borderRadius: '50%', flexShrink: 0,
-                background: i === 0 ? '#f0c040' : i === 1 ? '#8fa8c0' : i === 2 ? '#cd7f32' : '#1e3a52',
-                display: 'flex', alignItems: 'center', justifyContent: 'center',
-                fontSize: 11, fontWeight: 800,
-                color: i < 3 ? '#071220' : '#5a7a94',
-              }}>{i + 1}</span>
-              <div style={{ flex: 1, minWidth: 0 }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 3 }}>
-                  <span style={{ fontSize: 13, fontWeight: 600, color: '#e0eaf4' }}>{p.nama}</span>
-                  <span style={{ fontSize: 12, color: '#f0c040', fontWeight: 700 }}>{rpShort(p.revenue)}</span>
+        {/* Category + Payment */}
+        <div className="col-span-2 space-y-4">
+          {/* Penjualan per Kategori */}
+          <div className="bg-[#0d2137] border border-white/10 rounded-xl p-4">
+            <p className="text-sm font-semibold mb-3">Penjualan per Kategori</p>
+            <div className="space-y-2.5">
+              {kategoriPenjualan.map((k) => (
+                <div key={k.nama}>
+                  <div className="flex justify-between text-xs mb-1">
+                    <span className="text-gray-300">{k.nama}</span>
+                    <span className="font-semibold" style={{ color: k.color }}>{k.pct}%</span>
+                  </div>
+                  <div className="h-1.5 bg-[#071220] rounded-full overflow-hidden">
+                    <div
+                      className="h-full rounded-full transition-all"
+                      style={{ width: `${k.pct}%`, background: k.color }}
+                    />
+                  </div>
                 </div>
-                <div style={{ height: 4, background: '#1e3a52', borderRadius: 2 }}>
-                  <div style={{
-                    height: '100%', borderRadius: 2,
-                    width: `${(p.terjual / produkTerlaris[0].terjual) * 100}%`,
-                    background: 'linear-gradient(90deg, #f0c040, #10b981)',
-                  }} />
-                </div>
-                <span style={{ fontSize: 11, color: '#4a6a84' }}>{p.terjual} terjual</span>
-              </div>
+              ))}
             </div>
-          ))}
-        </div>
-      </div>
+          </div>
 
-      {/* ── OPEX vs ANGGARAN ── */}
-      <div style={{
-        background: 'linear-gradient(135deg, #0d2137, #0a1a2e)',
-        border: '1px solid #1e3a52', borderRadius: 16,
-        padding: 24, marginBottom: 24,
-      }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
-          <p style={{ margin: 0, fontWeight: 700, fontSize: 15 }}>⚙ OPEX vs Anggaran</p>
-          <span style={{
-            background: '#ef444420', color: '#ef4444',
-            borderRadius: 20, padding: '3px 12px', fontSize: 12, fontWeight: 700,
-          }}>1 kategori over budget</span>
-        </div>
-        <div style={{
-          display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
-          gap: 12,
-        }}>
-          {opexData.map(item => <OpexCard key={item.kategori} item={item} />)}
-        </div>
-      </div>
-
-      {/* ── JURNAL HARIAN ── */}
-      <div style={{
-        background: 'linear-gradient(135deg, #0d2137, #0a1a2e)',
-        border: '1px solid #1e3a52', borderRadius: 16, padding: 24,
-      }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
-          <p style={{ margin: 0, fontWeight: 700, fontSize: 15 }}>
-            📋 Jurnal Harian
-            <span style={{ color: '#4a6a84', fontWeight: 400, fontSize: 13, marginLeft: 8 }}>
-              {transaksiTerbaru.length} transaksi terbaru
-            </span>
-          </p>
-          <div style={{ display: 'flex', gap: 8 }}>
-            {['Export CSV', 'Export PDF'].map(btn => (
-              <button key={btn} style={{
-                background: '#0a1628', border: '1px solid #1e3a52',
-                color: '#8fa8c0', borderRadius: 8,
-                padding: '6px 14px', cursor: 'pointer', fontSize: 12,
-              }}>{btn}</button>
-            ))}
+          {/* Metode Pembayaran */}
+          <div className="bg-[#0d2137] border border-white/10 rounded-xl p-4">
+            <p className="text-sm font-semibold mb-3">Metode Pembayaran</p>
+            <div className="space-y-2">
+              {metodePembayaran.map((m) => (
+                <div key={m.nama} className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <div className="w-2 h-2 rounded-full" style={{ background: m.color }} />
+                    <span className="text-xs text-gray-300">{m.nama}</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span className="text-[10px] text-gray-500 bg-[#071220] px-1.5 py-0.5 rounded">{m.pct}%</span>
+                    <span className="text-xs font-semibold text-white">{rp(m.amount)}</span>
+                  </div>
+                </div>
+              ))}
+            </div>
           </div>
         </div>
-        <div style={{ overflowX: 'auto' }}>
-          <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13 }}>
+      </div>
+
+      {/* Order Type Stats */}
+      <div className="grid grid-cols-4 gap-3">
+        {[
+          { label: 'Kontrol Fraud', value: '2', color: 'text-red-400', bg: 'bg-red-500/10 border-red-500/20', icon: '🚨' },
+          { label: 'Dine-In', value: 'Rp 352k', color: 'text-white', bg: 'bg-[#0d2137] border-white/10', icon: '🍽️' },
+          { label: 'Take Away', value: 'Rp 310k', color: 'text-white', bg: 'bg-[#0d2137] border-white/10', icon: '🥡' },
+          { label: 'Order Online', value: 'Rp 182k', color: 'text-white', bg: 'bg-[#0d2137] border-white/10', icon: '📱' },
+        ].map((s) => (
+          <div key={s.label} className={`border rounded-xl p-4 ${s.bg}`}>
+            <p className="text-xs text-gray-400 mb-1">{s.icon} {s.label}</p>
+            <p className={`text-lg font-bold ${s.color}`}>{s.value}</p>
+          </div>
+        ))}
+      </div>
+
+      {/* Transaksi Terbaru */}
+      <div className="bg-[#0d2137] border border-white/10 rounded-xl overflow-hidden">
+        <div className="flex items-center justify-between px-4 py-3 border-b border-white/10">
+          <p className="text-sm font-semibold">Transaksi Terbaru</p>
+          <button className="text-xs text-[#0d8a6a] hover:underline">Lihat Semua</button>
+        </div>
+        <div className="overflow-x-auto">
+          <table className="w-full text-xs">
             <thead>
-              <tr style={{ borderBottom: '1px solid #1e3a52' }}>
-                {['TGL', 'KETERANGAN', 'KATEGORI', 'DEBIT', 'KREDIT'].map(h => (
-                  <th key={h} style={{
-                    padding: '8px 12px',
-                    textAlign: h === 'DEBIT' || h === 'KREDIT' ? 'right' : 'left',
-                    color: '#4a6a84', fontWeight: 600, fontSize: 11,
-                    letterSpacing: '0.08em',
-                  }}>{h}</th>
+              <tr className="text-gray-500 border-b border-white/5">
+                {['WAKTU', 'KASIR', 'PRODUK', 'JENIS ORDER', 'PEMBAYARAN', 'TOTAL', 'STATUS'].map((h) => (
+                  <th key={h} className="text-left px-4 py-2.5 font-semibold tracking-wider uppercase text-[10px]">{h}</th>
                 ))}
               </tr>
             </thead>
             <tbody>
               {transaksiTerbaru.map((t, i) => (
-                <tr key={i} style={{
-                  borderBottom: '1px solid #0d2137',
-                  background: i % 2 === 0 ? 'transparent' : '#0a1628',
-                }}>
-                  <td style={{ padding: '10px 12px', color: '#5a7a94', fontWeight: 600 }}>{t.tgl}</td>
-                  <td style={{ padding: '10px 12px', color: '#e0eaf4' }}>{t.keterangan}</td>
-                  <td style={{ padding: '10px 12px' }}>
-                    <span style={{
-                      background: t.kategori === 'PEMASUKAN' ? '#10b98120' : '#1e3a52',
-                      color: t.kategori === 'PEMASUKAN' ? '#10b981' : '#8fa8c0',
-                      borderRadius: 20, padding: '2px 10px', fontSize: 11, fontWeight: 700,
-                    }}>{t.kategori}</span>
-                  </td>
-                  <td style={{ padding: '10px 12px', textAlign: 'right', color: '#10b981', fontWeight: 700 }}>
-                    {t.debit ? rp(t.debit) : '—'}
-                  </td>
-                  <td style={{ padding: '10px 12px', textAlign: 'right', color: '#ef4444', fontWeight: 700 }}>
-                    {t.kredit ? rp(t.kredit) : '—'}
+                <tr key={i} className="border-b border-white/5 hover:bg-white/3 transition-colors">
+                  <td className="px-4 py-2.5 text-gray-400 font-medium">{t.waktu}</td>
+                  <td className="px-4 py-2.5 text-gray-300">{t.kasir}</td>
+                  <td className="px-4 py-2.5 text-gray-300 max-w-[160px] truncate">{t.produk}</td>
+                  <td className="px-4 py-2.5 text-gray-400">{t.jenis}</td>
+                  <td className="px-4 py-2.5 text-gray-400">{t.pembayaran}</td>
+                  <td className="px-4 py-2.5 text-[#0d8a6a] font-semibold">{rp(t.total)}</td>
+                  <td className="px-4 py-2.5">
+                    <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${
+                      t.status === 'LUNAS'
+                        ? 'bg-green-500/15 text-green-400'
+                        : 'bg-yellow-500/15 text-yellow-400'
+                    }`}>
+                      {t.status}
+                    </span>
                   </td>
                 </tr>
               ))}
