@@ -68,7 +68,7 @@ async function buildFinancialContext(businessId: string, period: string) {
     return acc;
   }, {});
 
-  const topExpenses = Object.entries(expenseByCategory)
+  const topExpenses = (Object.entries(expenseByCategory) as [string, number][])
     .sort((a, b) => b[1] - a[1])
     .slice(0, 5)
     .map(([cat, amount]) => ({ kategori: cat, total: amount }));
@@ -130,7 +130,7 @@ TOP KATEGORI PENGELUARAN:
 ${topExpenses.map((e, i) => `${i + 1}. ${e.kategori}: ${rp(e.total)}`).join('\n')}
 
 TOP KATEGORI PEMASUKAN:
-${Object.entries(incomeByCategory).sort((a, b) => b[1] - a[1]).slice(0, 5).map(([cat, amt], i) => `${i + 1}. ${cat}: ${rp(amt)}`).join('\n')}
+${(Object.entries(incomeByCategory) as [string, number][]).sort((a, b) => b[1] - a[1]).slice(0, 5).map(([cat, amt], i) => `${i + 1}. ${cat}: ${rp(amt)}`).join('\n')}
 
 DATA PENJUALAN:
 - Total Omset: ${rp(totalSales)} (${sales.length} transaksi)
