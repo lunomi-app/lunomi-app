@@ -34,8 +34,8 @@ const SIDEBAR: SGroup[] = [
     label: 'ANALITIK', roles: ['admin'],
     items: [
       { label: 'Dashboard Penjualan', href: '/dashboard', roles: ['admin'] },
-      { label: 'Analisa Laporan', href: '/laporan/analisa', badge: 'GRATIS', roles: ['admin'] },
-      { label: 'Laporan Lengkap', href: '/laporan/lengkap', badge: 'GRATIS', roles: ['admin'] },
+      { label: 'Analisa Laporan', href: '/laporan/analisa', roles: ['admin'] },
+      { label: 'Laporan Lengkap', href: '/laporan/lengkap', roles: ['admin'] },
     ],
   },
   {
@@ -49,6 +49,7 @@ const SIDEBAR: SGroup[] = [
     label: 'MANAJEMEN', roles: ['admin'],
     items: [
       { label: 'Produk', href: '/dashboard/menu', arrow: true, roles: ['admin'] },
+      { label: 'Master Resep', href: '/resep', arrow: true, roles: ['admin'] },
       { label: 'Inventori', href: '/inventori', arrow: true, roles: ['admin'] },
       { label: 'Pelanggan', href: '/pelanggan', arrow: true, roles: ['admin'] },
       { label: 'Promosi', href: '/promosi', arrow: true, roles: ['admin'] },
@@ -65,7 +66,7 @@ const SIDEBAR: SGroup[] = [
     ],
   },
   {
-    label: 'LAPORAN (SEMUA GRATIS)', roles: ['admin'],
+    label: 'LAPORAN', roles: ['admin'],
     items: [
       { label: 'Laporan Penjualan', href: '/laporan/penjualan', roles: ['admin'] },
       { label: 'Laporan Dapur', href: '/laporan/dapur', roles: ['admin'] },
@@ -79,7 +80,7 @@ const SIDEBAR: SGroup[] = [
       { label: 'Laporan Karyawan', href: '/laporan/karyawan', roles: ['admin'] },
       { label: 'Laporan Persediaan', href: '/laporan/persediaan', roles: ['admin'] },
       { label: 'Laporan Pemasok', href: '/laporan/pemasok', roles: ['admin'] },
-      { label: 'Export PDF/Excel', href: '/laporan/export', badge: 'GRATIS', roles: ['admin'] },
+      { label: 'Export PDF/Excel', href: '/laporan/export', roles: ['admin'] },
     ],
   },
   {

@@ -1,20 +1,6 @@
 'use client';
-import { useState } from 'react';
-
-const DATA = [
-  { nama: 'Biji Kopi Arabika', kategori: 'Bahan Baku', stok: 4.5, unit: 'kg', min: 2, harga: 180000 },
-  { nama: 'Biji Kopi Robusta', kategori: 'Bahan Baku', stok: 1.2, unit: 'kg', min: 2, harga: 120000 },
-  { nama: 'Susu Full Cream', kategori: 'Bahan Baku', stok: 12, unit: 'liter', min: 5, harga: 18000 },
-  { nama: 'Susu Oat', kategori: 'Bahan Baku', stok: 3, unit: 'liter', min: 3, harga: 45000 },
-  { nama: 'Matcha Powder', kategori: 'Bahan Baku', stok: 0.8, unit: 'kg', min: 1, harga: 320000 },
-  { nama: 'Gula Pasir', kategori: 'Bahan Baku', stok: 8, unit: 'kg', min: 3, harga: 14000 },
-  { nama: 'Gelas Plastik 16oz', kategori: 'Packaging', stok: 240, unit: 'pcs', min: 100, harga: 800 },
-  { nama: 'Kantong Kertas', kategori: 'Packaging', stok: 45, unit: 'pcs', min: 100, harga: 1200 },
-  { nama: 'Croissant Frozen', kategori: 'Makanan', stok: 18, unit: 'pcs', min: 10, harga: 12000 },
-  { nama: 'Kue Brownies', kategori: 'Makanan', stok: 0, unit: 'pcs', min: 5, harga: 25000 },
-  { nama: 'Vanilla Syrup', kategori: 'Topping', stok: 2, unit: 'botol', min: 2, harga: 55000 },
-  { nama: 'Caramel Syrup', kategori: 'Topping', stok: 3, unit: 'botol', min: 2, harga: 55000 },
-];
+import { useState, useEffect } from 'react';
+import { INVENTORY, subscribeInventory, rp } from '@/lib/data/store';
 
 type Kategori = 'SEMUA' | 'Bahan Baku' | 'Packaging' | 'Makanan' | 'Topping';
 
@@ -24,29 +10,60 @@ function getStatus(stok: number, min: number) {
   return { label: 'OK', cls: 'bg-green-500/15 text-green-400' };
 }
 
-const rp = (n: number) => 'Rp ' + n.toLocaleString('id-ID');
-
 export default function InventoriPage() {
   const [kat, setKat] = useState<Kategori>('SEMUA');
+  const [, forceUpdate] = useState(0);
+  const [showAdd, setShowAdd] = useState(false);
+  const [form, setForm] = useState({ nama: '', kategori: 'Bahan Baku', stok: '', unit: 'kg', min: '', harga: '' });
 
-  const filtered = DATA.filter(d => kat === 'SEMUA' || d.kategori === kat);
-  const lowCount = DATA.filter(d => d.stok <= d.min).length;
+  // Re-render saat inventory berubah dari kasir
+  useEffect(() => {
+    return subscribeInventory(() => forceUpdate(n => n + 1));
+  }, []);
+
+  const filtered = INVENTORY.filter(d => kat === 'SEMUA' || d.kategori === kat);
+  const lowCount = INVENTORY.filter(d => d.stok <= d.min).length;
+
+  const tambahStok = (id: string, jumlah: number) => {
+    const item = INVENTORY.find(i => i.id === id);
+    if (item) {
+      item.stok = parseFloat((item.stok + jumlah).toFixed(3));
+      forceUpdate(n => n + 1);
+    }
+  };
+
+  const addItem = () => {
+    if (!form.nama || !form.stok) return;
+    INVENTORY.push({
+      id: `I${Date.now()}`,
+      nama: form.nama,
+      kategori: form.kategori,
+      stok: parseFloat(form.stok) || 0,
+      unit: form.unit,
+      min: parseFloat(form.min) || 0,
+      harga: parseInt(form.harga) || 0,
+    });
+    setForm({ nama: '', kategori: 'Bahan Baku', stok: '', unit: 'kg', min: '', harga: '' });
+    setShowAdd(false);
+    forceUpdate(n => n + 1);
+  };
 
   return (
     <div className="p-5 space-y-4">
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-xl font-bold">Inventori</h1>
-          <p className="text-xs text-gray-500 mt-0.5">{DATA.length} item · {lowCount} perlu restock</p>
+          <p className="text-xs text-gray-500 mt-0.5">{INVENTORY.length} item · {lowCount} perlu restock</p>
         </div>
-        <button className="px-3 py-1.5 bg-[#0d8a6a] rounded-lg text-xs text-white font-medium hover:bg-[#0a7059] transition-colors">
+        <button onClick={() => setShowAdd(true)}
+          className="px-3 py-1.5 bg-[#0d8a6a] rounded-lg text-xs text-white font-medium hover:bg-[#0a7059] transition-colors">
           + Tambah Item
         </button>
       </div>
 
       {lowCount > 0 && (
         <div className="flex items-center gap-2 bg-yellow-500/10 border border-yellow-500/30 rounded-xl px-4 py-2.5 text-xs">
-          <span className="text-yellow-400 font-semibold">⚠ {lowCount} item stok menipis atau habis</span>
+          <span className="text-yellow-400 font-semibold">⚠ {lowCount} item stok menipis atau habis — stok berkurang otomatis saat penjualan</span>
         </div>
       )}
 
@@ -63,7 +80,7 @@ export default function InventoriPage() {
         <table className="w-full text-xs">
           <thead>
             <tr className="border-b border-white/10 text-gray-500">
-              {['NAMA', 'KATEGORI', 'STOK', 'STOK MIN', 'HARGA/UNIT', 'STATUS'].map(h => (
+              {['NAMA', 'KATEGORI', 'STOK', 'STOK MIN', 'HARGA/UNIT', 'STATUS', 'RESTOCK'].map(h => (
                 <th key={h} className="text-left px-4 py-3 font-semibold tracking-wider text-[10px]">{h}</th>
               ))}
             </tr>
@@ -72,7 +89,7 @@ export default function InventoriPage() {
             {filtered.map((item, i) => {
               const st = getStatus(item.stok, item.min);
               return (
-                <tr key={item.nama} className={`border-b border-white/5 hover:bg-white/3 ${i % 2 === 1 ? 'bg-white/[0.01]' : ''}`}>
+                <tr key={item.id} className={`border-b border-white/5 hover:bg-white/3 ${i % 2 === 1 ? 'bg-white/[0.01]' : ''}`}>
                   <td className="px-4 py-2.5 text-white font-medium">{item.nama}</td>
                   <td className="px-4 py-2.5 text-gray-400">{item.kategori}</td>
                   <td className="px-4 py-2.5 font-semibold" style={{ color: item.stok === 0 ? '#ef4444' : item.stok <= item.min ? '#f59e0b' : '#0d8a6a' }}>
@@ -83,12 +100,59 @@ export default function InventoriPage() {
                   <td className="px-4 py-2.5">
                     <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${st.cls}`}>{st.label}</span>
                   </td>
+                  <td className="px-4 py-2.5">
+                    <div className="flex items-center gap-1">
+                      {[1, 5, 10].map(n => (
+                        <button key={n} onClick={() => tambahStok(item.id, n)}
+                          className="px-1.5 py-0.5 bg-[#0d8a6a]/10 text-[#0d8a6a] border border-[#0d8a6a]/20 rounded text-[9px] font-bold hover:bg-[#0d8a6a] hover:text-white transition-colors">
+                          +{n}
+                        </button>
+                      ))}
+                    </div>
+                  </td>
                 </tr>
               );
             })}
           </tbody>
         </table>
       </div>
+
+      {/* Add Item Modal */}
+      {showAdd && (
+        <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50" onClick={() => setShowAdd(false)}>
+          <div className="bg-[#0d2137] border border-white/10 rounded-2xl p-6 w-96 shadow-2xl space-y-3" onClick={e => e.stopPropagation()}>
+            <div className="flex items-center justify-between mb-2">
+              <p className="font-bold text-white">Tambah Item Inventori</p>
+              <button onClick={() => setShowAdd(false)} className="text-gray-500 hover:text-white text-xl leading-none">×</button>
+            </div>
+            {[
+              { label: 'Nama Item', key: 'nama', type: 'text', ph: 'Biji Kopi Arabika' },
+              { label: 'Stok Awal', key: 'stok', type: 'number', ph: '10' },
+              { label: 'Satuan', key: 'unit', type: 'text', ph: 'kg / liter / pcs' },
+              { label: 'Stok Minimum', key: 'min', type: 'number', ph: '2' },
+              { label: 'Harga per Satuan (Rp)', key: 'harga', type: 'number', ph: '180000' },
+            ].map(f => (
+              <div key={f.key}>
+                <label className="text-[10px] text-gray-500 uppercase font-semibold">{f.label}</label>
+                <input type={f.type} value={(form as any)[f.key]} placeholder={f.ph}
+                  onChange={e => setForm(prev => ({ ...prev, [f.key]: e.target.value }))}
+                  className="mt-1 w-full bg-[#071220] border border-white/10 rounded-lg px-3 py-2 text-xs text-white placeholder-gray-600 outline-none focus:border-[#0d8a6a]" />
+              </div>
+            ))}
+            <div>
+              <label className="text-[10px] text-gray-500 uppercase font-semibold">Kategori</label>
+              <select value={form.kategori} onChange={e => setForm(prev => ({ ...prev, kategori: e.target.value }))}
+                className="mt-1 w-full bg-[#071220] border border-white/10 rounded-lg px-3 py-2 text-xs text-white outline-none focus:border-[#0d8a6a]">
+                {['Bahan Baku', 'Packaging', 'Makanan', 'Topping'].map(k => <option key={k}>{k}</option>)}
+              </select>
+            </div>
+            <button onClick={addItem}
+              className="w-full py-2.5 bg-[#0d8a6a] rounded-lg text-xs text-white font-bold hover:bg-[#0a7059] transition-colors mt-2">
+              Tambah Item
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

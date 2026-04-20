@@ -73,7 +73,128 @@ export const CAMPAIGNS = [
   { id: 'CM5', nama: 'Loyalty Reward Q1',   channel: 'Email',      mulai: '01 Mar 2026', selesai: '31 Mar 2026', budget: 300000,  reach: 428,   konversi: 95,  status: 'Selesai' },
 ];
 
-// Helpers
+// ─── Inventori (bahan baku + packaging) ────────────────────────────────────
+export type InventoryItem = {
+  id: string; nama: string; kategori: string;
+  stok: number; unit: string; min: number; harga: number;
+};
+
+export const INVENTORY: InventoryItem[] = [
+  { id: 'I1',  nama: 'Biji Kopi Arabika',  kategori: 'Bahan Baku', stok: 4.5,  unit: 'kg',    min: 2,   harga: 180000 },
+  { id: 'I2',  nama: 'Biji Kopi Robusta',  kategori: 'Bahan Baku', stok: 1.2,  unit: 'kg',    min: 2,   harga: 120000 },
+  { id: 'I3',  nama: 'Susu Full Cream',    kategori: 'Bahan Baku', stok: 12,   unit: 'liter', min: 5,   harga: 18000  },
+  { id: 'I4',  nama: 'Susu Oat',           kategori: 'Bahan Baku', stok: 3,    unit: 'liter', min: 3,   harga: 45000  },
+  { id: 'I5',  nama: 'Matcha Powder',      kategori: 'Bahan Baku', stok: 0.8,  unit: 'kg',    min: 1,   harga: 320000 },
+  { id: 'I6',  nama: 'Gula Pasir',         kategori: 'Bahan Baku', stok: 8,    unit: 'kg',    min: 3,   harga: 14000  },
+  { id: 'I7',  nama: 'Coklat Bubuk',       kategori: 'Bahan Baku', stok: 1.5,  unit: 'kg',    min: 1,   harga: 85000  },
+  { id: 'I8',  nama: 'Vanilla Syrup',      kategori: 'Topping',    stok: 2,    unit: 'botol', min: 2,   harga: 55000  },
+  { id: 'I9',  nama: 'Caramel Syrup',      kategori: 'Topping',    stok: 3,    unit: 'botol', min: 2,   harga: 55000  },
+  { id: 'I10', nama: 'Gelas Plastik 16oz', kategori: 'Packaging',  stok: 240,  unit: 'pcs',   min: 100, harga: 800    },
+  { id: 'I11', nama: 'Kantong Kertas',     kategori: 'Packaging',  stok: 45,   unit: 'pcs',   min: 100, harga: 1200   },
+  { id: 'I12', nama: 'Croissant Frozen',   kategori: 'Makanan',    stok: 18,   unit: 'pcs',   min: 10,  harga: 12000  },
+  { id: 'I13', nama: 'Roti Tawar',         kategori: 'Makanan',    stok: 10,   unit: 'pcs',   min: 5,   harga: 5000   },
+  { id: 'I14', nama: 'Kue Brownies',       kategori: 'Makanan',    stok: 0,    unit: 'pcs',   min: 5,   harga: 25000  },
+];
+
+// ─── Resep (recipe per produk) ──────────────────────────────────────────────
+export type RecipeIngredient = { inventoriId: string; nama: string; qty: number; unit: string };
+export type Recipe = { produkId: string; bahan: RecipeIngredient[] };
+
+export const RECIPES: Recipe[] = [
+  { produkId: 'P1', bahan: [
+    { inventoriId: 'I1', nama: 'Biji Kopi Arabika',  qty: 0.018, unit: 'kg'    },
+    { inventoriId: 'I10', nama: 'Gelas Plastik 16oz', qty: 1,     unit: 'pcs'   },
+  ]},
+  { produkId: 'P2', bahan: [
+    { inventoriId: 'I1', nama: 'Biji Kopi Arabika',  qty: 0.018, unit: 'kg'    },
+    { inventoriId: 'I10', nama: 'Gelas Plastik 16oz', qty: 1,     unit: 'pcs'   },
+  ]},
+  { produkId: 'P3', bahan: [
+    { inventoriId: 'I2', nama: 'Biji Kopi Robusta',  qty: 0.015, unit: 'kg'    },
+    { inventoriId: 'I3', nama: 'Susu Full Cream',     qty: 0.15,  unit: 'liter' },
+    { inventoriId: 'I6', nama: 'Gula Pasir',          qty: 0.02,  unit: 'kg'    },
+    { inventoriId: 'I10', nama: 'Gelas Plastik 16oz', qty: 1,     unit: 'pcs'   },
+  ]},
+  { produkId: 'P4', bahan: [
+    { inventoriId: 'I1', nama: 'Biji Kopi Arabika',  qty: 0.018, unit: 'kg'    },
+    { inventoriId: 'I3', nama: 'Susu Full Cream',     qty: 0.2,   unit: 'liter' },
+    { inventoriId: 'I10', nama: 'Gelas Plastik 16oz', qty: 1,     unit: 'pcs'   },
+  ]},
+  { produkId: 'P5', bahan: [
+    { inventoriId: 'I1', nama: 'Biji Kopi Arabika',  qty: 0.025, unit: 'kg'    },
+    { inventoriId: 'I10', nama: 'Gelas Plastik 16oz', qty: 1,     unit: 'pcs'   },
+  ]},
+  { produkId: 'P6', bahan: [
+    { inventoriId: 'I1', nama: 'Biji Kopi Arabika',  qty: 0.025, unit: 'kg'    },
+    { inventoriId: 'I10', nama: 'Gelas Plastik 16oz', qty: 1,     unit: 'pcs'   },
+  ]},
+  { produkId: 'P7', bahan: [
+    { inventoriId: 'I5', nama: 'Matcha Powder',       qty: 0.012, unit: 'kg'    },
+    { inventoriId: 'I3', nama: 'Susu Full Cream',     qty: 0.2,   unit: 'liter' },
+    { inventoriId: 'I6', nama: 'Gula Pasir',          qty: 0.02,  unit: 'kg'    },
+    { inventoriId: 'I10', nama: 'Gelas Plastik 16oz', qty: 1,     unit: 'pcs'   },
+  ]},
+  { produkId: 'P8', bahan: [
+    { inventoriId: 'I7', nama: 'Coklat Bubuk',        qty: 0.02,  unit: 'kg'    },
+    { inventoriId: 'I3', nama: 'Susu Full Cream',     qty: 0.2,   unit: 'liter' },
+    { inventoriId: 'I6', nama: 'Gula Pasir',          qty: 0.02,  unit: 'kg'    },
+    { inventoriId: 'I10', nama: 'Gelas Plastik 16oz', qty: 1,     unit: 'pcs'   },
+  ]},
+  { produkId: 'P9', bahan: [
+    { inventoriId: 'I12', nama: 'Croissant Frozen',   qty: 1,     unit: 'pcs'   },
+    { inventoriId: 'I11', nama: 'Kantong Kertas',     qty: 1,     unit: 'pcs'   },
+  ]},
+  { produkId: 'P10', bahan: [
+    { inventoriId: 'I13', nama: 'Roti Tawar',         qty: 2,     unit: 'pcs'   },
+    { inventoriId: 'I11', nama: 'Kantong Kertas',     qty: 1,     unit: 'pcs'   },
+  ]},
+  { produkId: 'P11', bahan: [
+    { inventoriId: 'I14', nama: 'Kue Brownies',       qty: 1,     unit: 'pcs'   },
+    { inventoriId: 'I11', nama: 'Kantong Kertas',     qty: 1,     unit: 'pcs'   },
+  ]},
+  { produkId: 'P12', bahan: [] },
+];
+
+// ─── Reactive store for inventory ──────────────────────────────────────────
+type Listener = () => void;
+const _listeners: Listener[] = [];
+
+export function subscribeInventory(fn: Listener): () => void {
+  _listeners.push(fn);
+  return () => {
+    const i = _listeners.indexOf(fn);
+    if (i > -1) _listeners.splice(i, 1);
+  };
+}
+
+function notifyInventory() {
+  _listeners.forEach(fn => fn());
+}
+
+export function consumeInventory(items: { produkId: string; qty: number }[]) {
+  items.forEach(({ produkId, qty }) => {
+    const recipe = RECIPES.find(r => r.produkId === produkId);
+    if (!recipe) return;
+    recipe.bahan.forEach(ing => {
+      const inv = INVENTORY.find(i => i.id === ing.inventoriId);
+      if (inv) inv.stok = Math.max(0, parseFloat((inv.stok - ing.qty * qty).toFixed(3)));
+    });
+  });
+  notifyInventory();
+}
+
+export function calcHppFromRecipe(produkId: string): number {
+  const recipe = RECIPES.find(r => r.produkId === produkId);
+  if (!recipe) return 0;
+  return recipe.bahan.reduce((total, ing) => {
+    const inv = INVENTORY.find(i => i.id === ing.inventoriId);
+    if (!inv) return total;
+    const hargaPerUnit = inv.unit === 'kg' ? inv.harga : inv.harga;
+    return total + hargaPerUnit * ing.qty;
+  }, 0);
+}
+
+// ─── Helpers ────────────────────────────────────────────────────────────────
 export const rp = (n: number) => 'Rp ' + n.toLocaleString('id-ID');
 export const rpK = (n: number) => n >= 1000000 ? `Rp ${(n/1000000).toFixed(1)}jt` : n >= 1000 ? `Rp ${(n/1000).toFixed(0)}rb` : rp(n);
 
